@@ -11,5 +11,13 @@
     "reusability"
   ],
   "author": "Ikor Jefocur",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IkorJefocur/mocha-declarative.git"
+  },
+  "bugs": {
+    "url": "https://github.com/IkorJefocur/mocha-declarative/issues"
+  },
+  "homepage": "https://github.com/IkorJefocur/mocha-declarative#readme"
 }
