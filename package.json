@@ -1,0 +1,15 @@
+{
+  "name": "mocha-declarative",
+  "version": "1.0.0",
+  "description": "Split mocha tests in blocks with small reusable functions and inheritance possibilities",
+  "main": "index.js",
+  "keywords": [
+    "mocha",
+    "test",
+    "oop",
+    "inheritance",
+    "reusability"
+  ],
+  "author": "Ikor Jefocur",
+  "license": "ISC"
+}
