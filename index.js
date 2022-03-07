@@ -30,21 +30,7 @@ function struct(rawSetup) {
 	if (!(setup.inherits instanceof Array))
 		setup.inherits = [setup.inherits];
 
-	setup.tests = bindIt(setup.tests, setup);
 	return setup;
-}
-
-function bindIt(block, obj) {
-	const result = {};
-	for (let [key, tests] of Object.entries(block)) {
-		if (isObject(tests))
-			result[key] = bindIt(tests, obj);
-		else if (typeof tests === 'function')
-			result[key] = tests.bind(obj);
-		else if (tests === null)
-			result[key] = tests;
-	}
-	return result;
 }
 
 function inherit(rawSetup) {
@@ -75,17 +61,17 @@ function run(setup) {
 		return;
 
 	const {name, tests} = setup;
-	runIt(`[${name}]`, tests);
+	runIt(setup, `[${name}]`, tests);
 }
 
-function runIt(desc, contents) {
+function runIt(root, desc, contents) {
 	if (isObject(contents))
 		describe(desc, () => {
 			for (let [desc, nestedContents] of Object.entries(contents))
-				runIt(desc, nestedContents);
+				runIt(root, desc, nestedContents);
 		});
 	else if (typeof contents === 'function')
-		it(desc, contents);
+		it(desc, contents.bind(root));
 }
 
 function isObject(value) {

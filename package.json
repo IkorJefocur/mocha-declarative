@@ -1,6 +1,6 @@
 {
   "name": "mocha-declarative",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Split mocha tests in blocks with small reusable functions and inheritance possibilities",
   "main": "index.js",
   "keywords": [
