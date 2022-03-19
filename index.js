@@ -22,7 +22,7 @@ function struct(rawSetup) {
 		if (keywords.has(key) || key.startsWith('_'))
 			setup[key] = value;
 		else
-			setup.tests[key] = value;
+			setup.tests[key] = structIt(value);
 	}
 
 	if (setup.inherits == null)
@@ -31,6 +31,17 @@ function struct(rawSetup) {
 		setup.inherits = [setup.inherits];
 
 	return setup;
+}
+
+function structIt(block) {
+	if (isObject(block))
+		for (let [desc, contents] of Object.entries(block))
+			block[desc] = structIt(contents);
+
+	else if (!(block instanceof Array))
+		return [block];
+
+	return block;
 }
 
 function inherit(rawSetup) {
@@ -50,9 +61,20 @@ function inherit(rawSetup) {
 
 function inheritIt(block, base) {
 	const result = Object.assign({}, base, block);
+
 	for (let key of Object.keys(block))
-		if (isObject(block[key]) && key in base && isObject(base[key]))
+		if (isObject(block[key]) && isObject(base[key]))
 			result[key] = inheritIt(block[key], base[key]);
+
+		else if (block[key] instanceof Array) {
+			result[key] = [];
+			for (let [index, pipelinePart] of block[key].entries())
+				if (typeof pipelinePart === 'function')
+					result[key].push(pipelinePart);
+				else if (pipelinePart)
+					result[key].push(base[key][index]);
+		}
+
 	return result;
 }
 
@@ -70,12 +92,39 @@ function runIt(root, desc, contents) {
 			for (let [desc, nestedContents] of Object.entries(contents))
 				runIt(root, desc, nestedContents);
 		});
-	else if (typeof contents === 'function')
-		it(desc, contents.bind(root));
+
+	else if (contents instanceof Array && contents.length > 0)
+		it(desc, async () => {
+			let arg = await runPipelineFn(
+				contents[0].bind(root),
+				contents[0].length >= 1
+			);
+			for (let fn of contents.slice(1))
+				arg = await runPipelineFn(
+					done => fn.call(root, arg, done),
+					fn.length >= 2
+				);
+		});
+}
+
+async function runPipelineFn(fn, callbackMode = false) {
+	if (callbackMode) {
+		let done;
+		const asyncResult = new Promise((resolve, reject) => {
+			done = (error, value) => error === undefined
+				? resolve(value)
+				: reject(error);
+		});
+		fn(done);
+		return asyncResult;
+	} else
+		return fn();
 }
 
 function isObject(value) {
-	return typeof value === 'object' && value !== null;
+	return typeof value === 'object'
+		&& value !== null
+		&& !(value instanceof Array);
 }
 
 module.exports = test;
