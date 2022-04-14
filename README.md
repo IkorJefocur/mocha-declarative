@@ -52,6 +52,8 @@ const a = test({
 	inherits: abstract,
 	// Run tests instantly
 	run: true,
+	// Run only this tests, not even inherited
+	only: true,
 
 	// Modify (not rewrite) "describe" block
 	'some feature': {
@@ -71,6 +73,9 @@ const a = test({
 
 // Mixin
 const mixin = test({
+
+	// Run only inherited from this block non-abstract tests
+	only: true,
 
 	'should implement something'() {},
 

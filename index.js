@@ -2,9 +2,10 @@ const
 	globalBase = {
 		name: 'global',
 		run: false,
+		only: false,
 		tests: {}
 	},
-	keywords = new Set(['name', 'run', 'inherits']);
+	keywords = new Set(['name', 'run', 'inherits', 'only']);
 
 function test(setup) {
 	setup = struct(setup);
@@ -29,6 +30,12 @@ function struct(rawSetup) {
 		setup.inherits = [globalBase];
 	if (!(setup.inherits instanceof Array))
 		setup.inherits = [setup.inherits];
+
+	if (
+		setup.only && setup.run
+		&& !Object.prototype.hasOwnProperty.call(setup, 'only')
+	)
+		setup.only = false;
 
 	return setup;
 }
@@ -79,11 +86,15 @@ function inheritIt(block, base) {
 }
 
 function run(setup) {
-	if (!setup.run)
+	const {name, tests, run, only} = setup;
+	if (!run)
 		return;
 
-	const {name, tests} = setup;
-	runIt(setup, `[${name}]`, tests);
+	const rootDescribe = only ? describe.only : describe;
+	rootDescribe(`[${name}]`, () => {
+		for (let [desc, contents] of Object.entries(tests))
+			runIt(setup, desc, contents);
+	});
 }
 
 function runIt(root, desc, contents) {
